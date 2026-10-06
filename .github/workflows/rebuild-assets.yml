@@ -1,0 +1,34 @@
+name: Rebuild binary assets
+
+on:
+  push:
+    paths:
+      - rebuild-assets.trigger
+
+permissions:
+  contents: write
+
+jobs:
+  rebuild:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Rebuild files
+        shell: bash
+        run: |
+          cat .assets-base64/pdf.part.* | base64 --decode > Spring_Boot_Practico_JPA_SQLite_Jhoan_v2.pdf
+          cat .assets-base64/db.part.* | base64 --decode > banking-lab.db
+          rm -rf .assets-base64
+          rm -f rebuild-assets.trigger
+          rm -f .github/workflows/rebuild-assets.yml
+
+      - name: Commit assets
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "Add PDF guide and seeded SQLite database"
+          git push
